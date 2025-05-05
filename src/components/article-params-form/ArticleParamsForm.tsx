@@ -3,7 +3,7 @@ import { Button } from 'src/ui/button';
 import clsx from 'clsx';
 
 import styles from './ArticleParamsForm.module.scss';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Text } from 'src/ui/text';
 import { Separator } from 'src/ui/separator';
@@ -20,16 +20,25 @@ import {
 } from 'src/constants/articleProps';
 import { RadioGroup } from 'src/ui/radio-group';
 
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+
 type ArticleParamsFormProps = {
 	setAppState: React.Dispatch<React.SetStateAction<ArticleStateType>>;
 };
 
 export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 	const { setAppState } = props;
+	const rootRef = useRef<HTMLFormElement>(null);
 
-	const [isOpened, setIsOpened] = useState<boolean>(false);
+	const [isMenuOpened, setIsMenuOpened] = useState<boolean>(false);
 	const [formState, setFormState] =
 		useState<ArticleStateType>(defaultArticleState);
+
+	useOutsideClickClose({
+		isOpen: isMenuOpened,
+		rootRef,
+		onChange: setIsMenuOpened,
+	});
 
 	const handleOnChange = (key: string, value: OptionType) => {
 		setFormState((currentFormState) => ({
@@ -52,18 +61,19 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 	return (
 		<>
 			<ArrowButton
-				isOpen={isOpened}
-				onClick={() => setIsOpened((currentValue) => !currentValue)}
+				isOpen={isMenuOpened}
+				onClick={() => setIsMenuOpened((currentValue) => !currentValue)}
 			/>
 			<aside
 				className={clsx({
 					[styles.container]: true,
-					[styles.container_open]: isOpened,
+					[styles.container_open]: isMenuOpened,
 				})}>
 				<form
 					className={styles.form}
 					onSubmit={handleOnSubmit}
-					onReset={handleOnReset}>
+					onReset={handleOnReset}
+					ref={rootRef}>
 					<Text as='h2' size={31} weight={800} uppercase align='left'>
 						Задайте параметры
 					</Text>
